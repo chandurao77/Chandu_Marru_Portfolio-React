@@ -1,966 +1,518 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import './Portfolio.css';
+
+/* ------------------------------------------------------------------ */
+/* Content. Edit the data below to update the site.                    */
+/* ------------------------------------------------------------------ */
+
+const EMAIL = 'Chandum9642@gmail.com';
+const PHONE = '609-701-1377';
+const PHONE_HREF = 'tel:+16097011377';
+const LINKEDIN_URL = 'https://www.linkedin.com/in/chandumarru964232/';
+const GITHUB_URL = 'https://github.com/chandurao77';
+
+// Replace with the latest resume link, or put a PDF in /public and use '/Chandu_Marru_Resume.pdf'.
+const RESUME_URL =
+  'https://docs.google.com/document/d/1cLF2Qxks5TQnYk-thQ2ps13JI6YBsiu1/edit?usp=sharing&ouid=115833640431706346767&rtpof=true&sd=true';
+
+// To show a photo, put the image in /public (for example public/profile.jpg) and set this to '/profile.jpg'.
+// While it is empty the hero shows the initials instead.
+const PHOTO_URL = '';
+
+const stats = [
+  { number: '9+', label: 'Years Experience' },
+  { number: '5', label: 'Major Companies' },
+  { number: '4', label: 'Industries' },
+  { number: '2', label: 'AI Systems in Production' }
+];
+
+const systems = [
+  {
+    title: 'Enterprise Knowledge Assistant (RAG)',
+    status: 'In production',
+    description:
+      'A question-answering system over internal engineering documentation. Engineers ask in plain English and get an answer with the source pages and a confidence level.',
+    pipeline: [
+      ['Question', 'plain English'],
+      ['Hybrid retrieval', 'BM25 + vector search'],
+      ['Second hop', 'when the first pass is weak'],
+      ['Rerank', 'keyword, vector, page signals'],
+      ['Answer', 'sources + confidence']
+    ],
+    numbers: [
+      ['92%', 'correct on a 50-question internal benchmark'],
+      ['4,800+', 'document chunks indexed'],
+      ['560', 'automated tests passing'],
+      ['<$0.001', 'model cost per query']
+    ],
+    techStack: ['Python', 'FastAPI', 'Azure OpenAI', 'PostgreSQL + pgvector', 'Elasticsearch', 'GraphRAG', 'Redis']
+  },
+  {
+    title: 'AI Log Investigation Platform',
+    status: 'In production, active development',
+    description:
+      'Takes a question about a failing account or service, pulls the relevant logs, and writes up the likely root cause.',
+    pipeline: [
+      ['Question', 'account or error'],
+      ['Intent routing', 'which domain, which flow'],
+      ['Log search', 'Elasticsearch'],
+      ['Event scoring', 'severity, rarity, timing'],
+      ['Root cause', 'grounded in runbooks']
+    ],
+    points: [
+      'Replaced positional slicing with scored event selection, so the analysis reads the events that matter.',
+      'Rebuilt intent classification, which had relied on substring matching.',
+      'Fixed reliability failures in the conversational flow: report polling, JSON parsing, domain routing and result ordering.'
+    ],
+    techStack: ['Python', 'LLM agents', 'Elasticsearch', 'AWS Lambda', 'Step Functions']
+  },
+  {
+    title: 'Cloud Delivery for AI Services',
+    status: 'Current work',
+    statusAlt: true,
+    description:
+      'The infrastructure that carries agent services from a commit to live traffic on AWS, with a controlled shift at the end.',
+    pipeline: [
+      ['Terraform', 'VPC, ALB, IAM'],
+      ['Image', 'Docker to ECR'],
+      ['Pipeline', 'Concourse, GitHub Actions'],
+      ['ECS Fargate', 'service behind the ALB'],
+      ['Route 53', 'weighted shift, canary']
+    ],
+    techStack: ['Terraform', 'Docker', 'ECR', 'ECS Fargate', 'Concourse', 'Route 53', 'CloudWatch']
+  }
+];
+
+const skills = [
+  {
+    title: 'Backend Development',
+    tags: ['Java 8/11', 'Spring Boot', 'Spring Security', 'Spring Data JPA', 'Hibernate', 'Kotlin', 'Microservices', 'REST APIs', 'GraphQL', 'OAuth2 / JWT', 'Python 3', 'FastAPI']
+  },
+  {
+    title: 'AI Engineering',
+    tags: ['RAG', 'Hybrid Search', 'Reranking', 'GraphRAG', 'Multi-hop Retrieval', 'LangGraph', 'LangChain', 'MCP', 'Agent Orchestration', 'Evaluation', 'Guardrails', 'Azure OpenAI', 'Claude API']
+  },
+  {
+    title: 'Frontend Development',
+    tags: ['React', 'Angular', 'TypeScript', 'JavaScript (ES6+)', 'Redux', 'Tailwind', 'Material UI', 'HTML5', 'CSS3']
+  },
+  {
+    title: 'Cloud & Infrastructure',
+    tags: ['AWS', 'ECS Fargate', 'Lambda', 'Step Functions', 'API Gateway', 'S3', 'RDS', 'Route 53', 'CloudWatch', 'Azure', 'Terraform']
+  },
+  {
+    title: 'Databases & Search',
+    tags: ['PostgreSQL', 'pgvector', 'Elasticsearch', 'MySQL', 'Oracle', 'MongoDB', 'DynamoDB', 'Cosmos DB', 'Redis']
+  },
+  {
+    title: 'Messaging & Streaming',
+    tags: ['Apache Kafka', 'RabbitMQ', 'AWS SQS / SNS', 'AWS Kinesis', 'Azure Service Bus', 'Event-Driven Architecture']
+  },
+  {
+    title: 'DevOps & CI/CD',
+    tags: ['Docker', 'Kubernetes', 'OpenShift', 'Jenkins', 'GitHub Actions', 'Concourse', 'Azure DevOps', 'Maven', 'Gradle']
+  },
+  {
+    title: 'Testing & Observability',
+    tags: ['JUnit', 'Mockito', 'Jest', 'TDD', 'ELK Stack', 'CloudWatch', 'Swagger / OpenAPI']
+  }
+];
+
+const experiences = [
+  {
+    title: 'Senior Java Full Stack Developer / AI Engineer',
+    company: 'Comcast',
+    location: 'Philadelphia, PA',
+    date: 'Oct 2025 - Present',
+    highlights: [
+      'Build and run two production AI systems used by engineering teams: a RAG knowledge assistant and an AI log investigation platform.',
+      'Write Java 11 and Spring Boot services alongside Python and FastAPI services on AWS: ECS Fargate, Lambda, Step Functions, DynamoDB, SQS and API Gateway.',
+      'Own deployment and traffic management with Terraform, Docker, Concourse and GitHub Actions, including Route 53 traffic shifting and canary releases.',
+      'Trace production issues to root cause across distributed services using centralized logging and CloudWatch.',
+      'Work spec-first with AI coding tools: proposal, design and task specs before code.'
+    ],
+    techStack: ['Java 11', 'Spring Boot', 'Python 3', 'FastAPI', 'AWS', 'Terraform', 'Docker', 'RAG', 'AI Agents']
+  },
+  {
+    title: 'Senior Java Full Stack Developer',
+    company: 'TD Bank',
+    location: 'Mount Laurel, NJ',
+    date: 'Sep 2024 - Sep 2025',
+    highlights: [
+      'Built Java and Kotlin Spring Boot microservices with JPA, Hibernate and Spring Security on a platform handling about 2M transactions a day.',
+      'Used Apache Kafka for asynchronous messaging between services.',
+      'Delivered React and Redux front ends, GraphQL APIs and Node.js backend-for-frontend services.'
+    ],
+    techStack: ['Java', 'Kotlin', 'Spring Boot', 'Kafka', 'React', 'Redux', 'GraphQL', 'Node.js', 'AWS']
+  },
+  {
+    title: 'Java Full Stack Developer',
+    company: 'Win Supply',
+    location: 'Dayton, OH',
+    date: 'Jul 2023 - Aug 2024',
+    highlights: [
+      'Built Angular and TypeScript interfaces on Java and Kotlin Spring Boot services with PostgreSQL.',
+      'Implemented Kafka event streaming and OAuth 2.0 secured APIs.',
+      'Containerized services with Docker on Kubernetes, with Jenkins and Gradle pipelines and Terraform for infrastructure.'
+    ],
+    techStack: ['Angular', 'TypeScript', 'Spring Boot', 'Kafka', 'PostgreSQL', 'Docker', 'Kubernetes', 'Terraform']
+  },
+  {
+    title: 'Java / J2EE Developer',
+    company: 'AIG',
+    location: 'Farmington, CT',
+    date: 'Apr 2022 - Feb 2023',
+    highlights: [
+      'Built Spring Boot REST services for third-party integrations, secured with JWT and OAuth.',
+      'Automated workflows on Azure with Functions, Logic Apps, Service Bus and Event Grid, with Data Factory pipelines and Cosmos DB.',
+      'Deployed to OpenShift through Azure DevOps.'
+    ],
+    techStack: ['Spring Boot', 'Azure Functions', 'Logic Apps', 'Cosmos DB', 'Data Factory', 'OpenShift']
+  },
+  {
+    title: 'Java Developer',
+    company: 'Ewall Solution',
+    location: 'Hyderabad, India',
+    date: 'Jan 2017 - Nov 2021',
+    highlights: [
+      'Built Java applications with Spring, exposing REST and SOAP services on JBoss.',
+      'Used AWS Lambda, EC2 and S3, with RabbitMQ for messaging.',
+      'Set up Maven, Jenkins and GitHub Actions pipelines, with JUnit and Mockito tests.'
+    ],
+    techStack: ['Java', 'Spring', 'REST / SOAP', 'AWS Lambda', 'RabbitMQ', 'JBoss']
+  }
+];
+
+/* ------------------------------------------------------------------ */
+/* Small pieces                                                        */
+/* ------------------------------------------------------------------ */
+
+const getInitialTheme = () => {
+  try {
+    return localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+  } catch (e) {
+    return 'dark';
+  }
+};
+
+const CopyButton = ({ value }) => {
+  const [label, setLabel] = useState('Copy');
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setLabel('Copied');
+    } catch (e) {
+      setLabel('Copy failed');
+    }
+    setTimeout(() => setLabel('Copy'), 1600);
+  };
+
+  return (
+    <button className="copy" type="button" onClick={handleCopy}>
+      {label}
+    </button>
+  );
+};
+
+const Pipeline = ({ steps }) => (
+  <div className="pipe-box">
+    <ol className="pipe" style={{ '--n': steps.length }}>
+      {steps.map(([name, detail], index) => (
+        <li key={name} style={{ '--i': index }}>
+          <b>{name}</b>
+          <span>{detail}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+);
+
+const TechStack = ({ items }) => (
+  <div className="tech-stack">
+    {items.map((tech) => (
+      <span key={tech} className="tech-badge">{tech}</span>
+    ))}
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
 const Portfolio = () => {
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [cursorFollowerPosition, setCursorFollowerPosition] = useState({ x: 0, y: 0 });
+  const [theme, setTheme] = useState(getInitialTheme);
+  const cursorRef = useRef(null);
+  const followerRef = useRef(null);
 
+  // Light / dark mode: dark is the default, the visitor's choice is remembered.
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setCursorPosition({ x: e.clientX, y: e.clientY });
-      setTimeout(() => {
-        setCursorFollowerPosition({ x: e.clientX, y: e.clientY });
-      }, 100);
-    };
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      /* storage unavailable: the toggle still works for this visit */
+    }
+  }, [theme]);
 
-    document.addEventListener('mousemove', handleMouseMove);
-    return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
+  // Custom cursor: the ring follows the pointer, the dot trails it. Mouse only.
   useEffect(() => {
-    const handleScroll = () => {
-      const scrolled = window.pageYOffset;
-      const bgGrid = document.querySelector('.bg-grid');
-      if (bgGrid) {
-        bgGrid.style.transform = `translateY(${scrolled * 0.5}px)`;
+    const ring = cursorRef.current;
+    const dot = followerRef.current;
+    let x = 0;
+    let y = 0;
+    let dx = 0;
+    let dy = 0;
+    let frame = null;
+
+    const tick = () => {
+      dx += (x - dx) * 0.2;
+      dy += (y - dy) * 0.2;
+      dot.style.transform = `translate(${dx}px, ${dy}px)`;
+      if (Math.abs(x - dx) > 0.3 || Math.abs(y - dy) > 0.3) {
+        frame = requestAnimationFrame(tick);
+      } else {
+        frame = null;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
+    const handleMouseMove = (e) => {
+      document.documentElement.classList.add('has-cursor');
+      x = e.clientX;
+      y = e.clientY;
+      ring.style.transform = `translate(${x}px, ${y}px)`;
+      if (frame === null) frame = requestAnimationFrame(tick);
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('.timeline-item, .skill-category, .stat-card').forEach(el => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(30px)';
-      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-      observer.observe(el);
-    });
-
-    return () => observer.disconnect();
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
   }, []);
 
-  const handleSmoothScroll = (e, targetId) => {
-    e.preventDefault();
-    const target = document.querySelector(targetId);
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  };
-
-  const skills = [
-    {
-      title: 'Backend Development',
-      tags: ['Java', 'Spring Boot', 'Spring Framework', 'Hibernate', 'Spring Data JPA', 'Spring Security', 'Spring Batch', 'Microservices', 'RESTful APIs', 'GraphQL', 'Node.js']
-    },
-    {
-      title: 'Frontend Development',
-      tags: ['React.js', 'Angular', 'TypeScript', 'JavaScript (ES6+)', 'Redux', 'Material UI', 'HTML5', 'CSS3', 'React Router']
-    },
-    {
-      title: 'Cloud & Infrastructure',
-      tags: ['AWS', 'EC2', 'Lambda', 'S3', 'RDS', 'Azure', 'Docker', 'Kubernetes', 'OpenShift', 'Terraform']
-    },
-    {
-      title: 'Databases',
-      tags: ['MySQL', 'PostgreSQL', 'MongoDB', 'DynamoDB', 'CosmosDB', 'SQL', 'NoSQL']
-    },
-    {
-      title: 'Messaging & Streaming',
-      tags: ['Apache Kafka', 'RabbitMQ', 'AWS Kinesis', 'JMS', 'Event-Driven Architecture']
-    },
-    {
-      title: 'DevOps & CI/CD',
-      tags: ['Jenkins', 'GitHub Actions', 'Maven', 'Gradle', 'Git', 'Azure DevOps', 'Ansible', 'CloudFormation']
-    },
-    {
-      title: 'Testing & Quality',
-      tags: ['JUnit', 'Mockito', 'Cucumber', 'Jest', 'TDD', 'BDD', 'SonarQube']
-    },
-    {
-      title: 'Monitoring & Observability',
-      tags: ['ELK Stack', 'CloudWatch', 'Log4J', 'Swagger', 'Postman']
-    }
-  ];
-
-  const experiences = [
-    {
-      title: 'Senior Java Full Stack Developer',
-      company: 'Comcast',
-      location: 'Philadelphia, PA',
-      date: 'Oct 2025 - Present',
-      highlights: [
-        'Architected cloud-native applications using Java 11 and Python 3 in distributed AWS environment, improving system scalability by 40%',
-        'Engineered AWS Step Functions workflows orchestrating Lambda functions and containerized services, reducing processing time by 35%',
-        'Implemented centralized logging framework with ELK stack and MDC, reducing MTTR by 50% for production issues',
-        'Built serverless Lambda functions integrated with DynamoDB and S3, processing 1M+ daily requests',
-        'Automated CI/CD pipelines with Concourse and GitHub Actions, achieving 99.9% deployment success rate',
-        'Mentored 5 junior engineers on AWS best practices and microservices architecture'
-      ],
-      techStack: ['Java 11', 'Python 3', 'Spring Boot', 'AWS Lambda', 'DynamoDB', 'Step Functions', 'ELK Stack', 'Docker', 'GitHub Actions']
-    },
-    {
-      title: 'Senior Java Full Stack Developer',
-      company: 'TD Bank',
-      location: 'Mt. Laurel, NJ',
-      date: 'Sep 2024 - Sep 2025',
-      highlights: [
-        'Designed microservices architecture using Spring Boot, improving system modularity and reducing deployment time by 60%',
-        'Built real-time event processing pipeline with AWS Kinesis, handling 500K+ events per day',
-        'Developed React.js frontend applications with Redux state management, enhancing user experience across 50+ components',
-        'Created GraphQL APIs reducing data over-fetching by 70% and improving frontend performance',
-        'Implemented Apache Kafka for asynchronous messaging, improving system responsiveness by 45%',
-        'Optimized Hibernate ORM configurations, reducing query latency by 30%',
-        'Built Node.js BFF services supporting API aggregation and service coordination'
-      ],
-      techStack: ['Spring Boot', 'React.js', 'GraphQL', 'AWS Kinesis', 'Kafka', 'Node.js', 'MySQL', 'MongoDB', 'Jenkins']
-    },
-    {
-      title: 'Java Full Stack Developer',
-      company: 'Win Supply',
-      location: 'Dayton, OH',
-      date: 'Jul 2023 - Aug 2024',
-      highlights: [
-        'Developed Angular-based responsive UIs with TypeScript and Material UI, serving 100K+ users',
-        'Implemented Kafka event-driven architecture for large-scale data streaming, processing 2M+ events daily',
-        'Secured APIs with OAuth 2.0 authentication, ensuring compliance with security standards',
-        'Containerized microservices with Docker and orchestrated deployments on Kubernetes',
-        'Built CI/CD pipelines with Jenkins and Gradle, reducing deployment time from hours to minutes',
-        'Integrated Terraform for infrastructure as code, ensuring consistent environment provisioning'
-      ],
-      techStack: ['Angular', 'TypeScript', 'Spring Boot', 'Kafka', 'Docker', 'Kubernetes', 'OAuth 2.0', 'PostgreSQL']
-    },
-    {
-      title: 'J2EE Developer',
-      company: 'AIG',
-      location: 'Farmington, CT',
-      date: 'Apr 2022 - Feb 2023',
-      highlights: [
-        'Built RESTful web services for seamless integration with third-party platforms',
-        'Designed Azure Data Factory ETL pipelines processing TB-scale data for analytics',
-        'Implemented Azure Logic Apps for workflow automation, reducing manual processing by 80%',
-        'Developed serverless Azure Functions for event-driven backend automation',
-        'Integrated CosmosDB for globally distributed, low-latency data access',
-        'Applied AOP for centralized logging and transaction management across microservices'
-      ],
-      techStack: ['Spring Boot', 'Azure', 'CosmosDB', 'Azure Functions', 'ADF', 'OpenShift', 'JUnit']
-    },
-    {
-      title: 'Java Developer',
-      company: 'Ewall Solution',
-      location: 'Hyderabad, India',
-      date: 'Jan 2017 - Nov 2021',
-      highlights: [
-        'Developed scalable Java applications using Spring Framework and MVC architecture',
-        'Built AWS Lambda serverless components reducing infrastructure costs by 40%',
-        'Implemented RabbitMQ for reliable asynchronous messaging in microservices',
-        'Created responsive frontends using HTML5, CSS3, JavaScript, and jQuery',
-        'Established CI/CD pipelines with GitHub Actions and Maven for automated deployments',
-        'Practiced TDD with JUnit and Mockito, achieving 85%+ code coverage'
-      ],
-      techStack: ['Java', 'Spring Framework', 'AWS Lambda', 'RabbitMQ', 'SOAP', 'JavaScript', 'JBoss']
-    }
-  ];
-
-  const stats = [
-    { number: '8+', label: 'Years Experience' },
-    { number: '50+', label: 'Technologies Mastered' },
-    { number: '100+', label: 'Projects Delivered' },
-    { number: '5', label: 'Major Companies' }
-  ];
+  const toggleTheme = () => setTheme((current) => (current === 'light' ? 'dark' : 'light'));
 
   return (
-    <div style={{ fontFamily: "'Space Mono', monospace", background: '#0a0a0a', color: '#ffffff', overflow: 'hidden' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
-
-        :root {
-            --primary: #00ff88;
-            --secondary: #0066ff;
-            --dark: #0a0a0a;
-            --gray: #1a1a1a;
-            --light-gray: #2a2a2a;
-            --text: #ffffff;
-            --text-dim: #a0a0a0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Space Mono', monospace;
-            background: var(--dark);
-            color: var(--text);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        .bg-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(var(--gray) 1px, transparent 1px),
-                linear-gradient(90deg, var(--gray) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.3;
-            z-index: 0;
-            animation: gridPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes gridPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.5; }
-        }
-
-        .container {
-            position: relative;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 40px;
-            z-index: 1;
-        }
-
-        header {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-content {
-            animation: slideUp 1s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--primary);
-            margin-bottom: 20px;
-            display: inline-block;
-            animation: fadeIn 1s ease-out 0.3s both;
-        }
-
-        h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(3rem, 8vw, 7rem);
-            font-weight: 800;
-            line-height: 0.95;
-            margin-bottom: 30px;
-            animation: fadeIn 1s ease-out 0.5s both;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .tagline {
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-            color: var(--text-dim);
-            max-width: 800px;
-            margin-bottom: 40px;
-            animation: fadeIn 1s ease-out 0.7s both;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .contact-info {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 50px;
-            animation: fadeIn 1s ease-out 0.9s both;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-dim);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
-        }
-
-        .contact-item:hover {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            animation: fadeIn 1s ease-out 1.1s both;
-        }
-
-        .btn {
-            padding: 18px 40px;
-            font-family: 'Space Mono', monospace;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 2px solid var(--primary);
-            background: transparent;
-            color: var(--primary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--primary);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
-
-        .btn:hover::before {
-            left: 0;
-        }
-
-        .btn:hover {
-            color: var(--dark);
-        }
-
-        .btn.secondary {
-            border-color: var(--secondary);
-            color: var(--secondary);
-        }
-
-        .btn.secondary::before {
-            background: var(--secondary);
-        }
-
-        section {
-            padding: 120px 0;
-            position: relative;
-        }
-
-        .section-header {
-            margin-bottom: 80px;
-        }
-
-        .section-number {
-            font-size: 1rem;
-            color: var(--primary);
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .section-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-dim);
-            max-width: 700px;
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .skill-category {
-            background: var(--gray);
-            padding: 40px;
-            border-left: 4px solid var(--primary);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .skill-category::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .skill-category:hover::before {
-            left: 100%;
-        }
-
-        .skill-category:hover {
-            background: var(--light-gray);
-            transform: translateX(10px);
-        }
-
-        .skill-category h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .skill-tag {
-            padding: 8px 16px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            font-size: 0.9rem;
-            color: var(--text);
-            transition: all 0.3s ease;
-        }
-
-        .skill-tag:hover {
-            background: var(--primary);
-            color: var(--dark);
-            transform: translateY(-2px);
-        }
-
-        .timeline {
-            position: relative;
-            padding-left: 50px;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
-        }
-
-        .timeline-item {
-            margin-bottom: 80px;
-            position: relative;
-            animation: slideUp 0.8s ease-out both;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -56px;
-            top: 0;
-            width: 14px;
-            height: 14px;
-            background: var(--primary);
-            border: 3px solid var(--dark);
-            border-radius: 50%;
-            box-shadow: 0 0 20px var(--primary);
-        }
-
-        .timeline-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .timeline-title {
-            flex: 1;
-        }
-
-        .timeline-title h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-        }
-
-        .company {
-            color: var(--primary);
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
-
-        .location {
-            color: var(--text-dim);
-            font-size: 0.95rem;
-        }
-
-        .timeline-date {
-            font-size: 0.9rem;
-            color: var(--secondary);
-            padding: 10px 20px;
-            background: rgba(0, 102, 255, 0.1);
-            border: 1px solid rgba(0, 102, 255, 0.3);
-            white-space: nowrap;
-        }
-
-        .timeline-content ul {
-            list-style: none;
-            margin-top: 20px;
-        }
-
-        .timeline-content li {
-            padding-left: 30px;
-            margin-bottom: 15px;
-            position: relative;
-            color: var(--text-dim);
-            line-height: 1.8;
-        }
-
-        .timeline-content li::before {
-            content: '▹';
-            position: absolute;
-            left: 0;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid var(--light-gray);
-        }
-
-        .tech-badge {
-            padding: 6px 14px;
-            background: var(--light-gray);
-            color: var(--text);
-            font-size: 0.85rem;
-            border: 1px solid var(--gray);
-            transition: all 0.3s ease;
-        }
-
-        .tech-badge:hover {
-            background: rgba(0, 255, 136, 0.1);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin: 80px 0;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 50px 30px;
-            background: var(--gray);
-            border-top: 4px solid var(--primary);
-            transition: all 0.4s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
-        }
-
-        .stat-number {
-            font-family: 'Syne', sans-serif;
-            font-size: 4rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-dim);
-        }
-
-        footer {
-            padding: 80px 0 40px;
-            border-top: 1px solid var(--light-gray);
-        }
-
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .footer-text h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-
-        .footer-link {
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .footer-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: width 0.3s ease;
-        }
-
-        .footer-link:hover {
-            color: var(--primary);
-        }
-
-        .footer-link:hover::after {
-            width: 100%;
-        }
-
-        .copyright {
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            padding-top: 30px;
-            border-top: 1px solid var(--light-gray);
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(10px); }
-        }
-
-        .scroll-indicator span {
-            display: block;
-            width: 30px;
-            height: 50px;
-            border: 2px solid var(--primary);
-            border-radius: 25px;
-            position: relative;
-        }
-
-        .scroll-indicator span::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 6px;
-            background: var(--primary);
-            border-radius: 50%;
-            animation: scrollDot 2s infinite;
-        }
-
-        @keyframes scrollDot {
-            0% { opacity: 1; top: 10px; }
-            100% { opacity: 0; top: 30px; }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 20px;
-            }
-
-            h1 {
-                font-size: 3rem;
-            }
-
-            .contact-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
-
-            section {
-                padding: 60px 0;
-            }
-
-            .timeline {
-                padding-left: 30px;
-            }
-
-            .timeline-item::before {
-                left: -36px;
-            }
-
-            .timeline-header {
-                flex-direction: column;
-            }
-
-            .stat-number {
-                font-size: 3rem;
-            }
-
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .footer-links {
-                justify-content: center;
-            }
-        }
-
-        .cursor {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--primary);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transition: all 0.15s ease;
-            mix-blend-mode: difference;
-        }
-
-        .cursor-follower {
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            background: var(--primary);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transition: all 0.05s ease;
-        }
-      `}</style>
-
+    <>
       <div className="bg-grid"></div>
-      <div className="cursor" style={{ left: cursorPosition.x, top: cursorPosition.y }}></div>
-      <div className="cursor-follower" style={{ left: cursorFollowerPosition.x, top: cursorFollowerPosition.y }}></div>
+      <div className="cursor" ref={cursorRef}></div>
+      <div className="cursor-follower" ref={followerRef}></div>
 
-      {/* Hero Section */}
-      <header>
+      {/* Navigation */}
+      <header className="nav">
         <div className="container">
-          <div className="hero-content">
-            <div className="label">Senior Full Stack Developer</div>
-            <h1>Chandu <span className="gradient-text">Marru</span></h1>
-            <p className="tagline">
-              Architecting scalable cloud-native applications with 8+ years of expertise in Java, Spring Boot, AWS, and modern frontend frameworks. Transforming complex business requirements into elegant, high-performance solutions.
-            </p>
-            
-            <div className="contact-info">
-              <a href="mailto:Chandum9642@gmail.com" className="contact-item">
-                <span>📧</span>
-                <span>Chandum9642@gmail.com</span>
-              </a>
-              <a href="tel:609-701-1377" className="contact-item">
-                <span>📱</span>
-                <span>609-701-1377</span>
-              </a>
-              <a href="https://www.linkedin.com/in/chandumarru964232/" target="_blank" rel="noopener noreferrer" className="contact-item">
-                <span>💼</span>
-                <span>LinkedIn Profile</span>
-              </a>
-            </div>
-
-            <div className="cta-buttons">
-              <a href="#experience" onClick={(e) => handleSmoothScroll(e, '#experience')} className="btn">View Experience</a>
-              <a href="#skills" onClick={(e) => handleSmoothScroll(e, '#skills')} className="btn secondary">Technical Skills</a>
-              <a href="https://docs.google.com/document/d/1cLF2Qxks5TQnYk-thQ2ps13JI6YBsiu1/edit?usp=sharing&ouid=115833640431706346767&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer" className="btn" style={{ borderColor: '#fff', color: '#fff' }}>
-                <span style={{ marginRight: '8px' }}>📥</span> Download Resume
-              </a>
-              <a href="https://github.com/chandurao77" target="_blank" rel="noopener noreferrer" className="btn" style={{ borderColor: '#4285f4', color: '#4285f4' }}>
-                <span style={{ marginRight: '8px' }}>💻</span> View Projects
-              </a>
-            </div>
-          </div>
-          <div className="scroll-indicator">
-            <span></span>
-          </div>
+          <a className="nav-brand" href="#top">Chandu <span>Marru</span></a>
+          <nav className="nav-links" aria-label="Sections">
+            <a href="#ai">AI Systems</a>
+            <a href="#skills">Skills</a>
+            <a href="#experience">Experience</a>
+            <a href="#contact">Contact</a>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label="Switch color mode">
+              <i></i>
+              <span>{theme === 'light' ? 'Dark' : 'Light'}</span>
+            </button>
+            <a className="nav-cta" href={RESUME_URL} target="_blank" rel="noopener noreferrer">Resume</a>
+          </nav>
         </div>
       </header>
 
-      {/* Stats Section */}
-      <section>
+      <main id="top">
+        {/* Hero */}
+        <section className="hero">
+          <div className="container hero-grid">
+            <div>
+              <div className="label">Senior Java Full Stack Developer / AI Engineer</div>
+              <h1>Chandu <span className="gradient-text">Marru</span></h1>
+              <p className="tagline">
+                <strong>9+ years</strong> building cloud-native applications with Java, Spring Boot, AWS and modern
+                frontend frameworks. Today I build <strong>production RAG and AI agent systems</strong>, and the
+                backend services and infrastructure that run them.
+              </p>
+
+              <div className="contact-info">
+                <a href={`mailto:${EMAIL}`} className="contact-item"><b>&gt;</b>{EMAIL}</a>
+                <a href={PHONE_HREF} className="contact-item"><b>&gt;</b>{PHONE}</a>
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="contact-item"><b>&gt;</b>LinkedIn</a>
+                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="contact-item"><b>&gt;</b>GitHub</a>
+              </div>
+
+              <div className="cta-buttons">
+                <a href="#ai" className="btn">AI Systems</a>
+                <a href="#experience" className="btn secondary">View Experience</a>
+                <a href={RESUME_URL} target="_blank" rel="noopener noreferrer" className="btn plain">Download Resume</a>
+              </div>
+            </div>
+
+            <div className="avatar">
+              <div className="avatar-inner">
+                {PHOTO_URL ? (
+                  <img src={PHOTO_URL} alt="Chandu Marru" />
+                ) : (
+                  <span className="gradient-text">CM</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats */}
         <div className="container">
           <div className="stats">
-            {stats.map((stat, index) => (
-              <div key={index} className="stat-card">
+            {stats.map((stat) => (
+              <div key={stat.label} className="stat-card">
                 <div className="stat-number">{stat.number}</div>
                 <div className="stat-label">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* Skills Section */}
-      <section id="skills">
-        <div className="container">
-          <div className="section-header">
-            <div className="section-number">01 / EXPERTISE</div>
-            <h2>Technical Arsenal</h2>
-            <p className="section-subtitle">
-              A comprehensive toolkit spanning backend development, cloud architecture, frontend engineering, and DevOps practices.
-            </p>
-          </div>
-
-          <div className="skills-grid">
-            {skills.map((category, index) => (
-              <div key={index} className="skill-category">
-                <h3>{category.title}</h3>
-                <div className="skill-tags">
-                  {category.tags.map((tag, tagIndex) => (
-                    <span key={tagIndex} className="skill-tag">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Experience Section */}
-      <section id="experience">
-        <div className="container">
-          <div className="section-header">
-            <div className="section-number">02 / CAREER JOURNEY</div>
-            <h2>Professional Experience</h2>
-            <p className="section-subtitle">
-              Building enterprise-grade solutions across finance, telecommunications, insurance, and e-commerce sectors.
-            </p>
-          </div>
-
-          <div className="timeline">
-            {experiences.map((exp, index) => (
-              <div key={index} className="timeline-item">
-                <div className="timeline-header">
-                  <div className="timeline-title">
-                    <h3>{exp.title}</h3>
-                    <div className="company">{exp.company}</div>
-                    <div className="location">{exp.location}</div>
-                  </div>
-                  <div className="timeline-date">{exp.date}</div>
-                </div>
-                <div className="timeline-content">
-                  <ul>
-                    {exp.highlights.map((highlight, hIndex) => (
-                      <li key={hIndex}>{highlight}</li>
-                    ))}
-                  </ul>
-                  <div className="tech-stack">
-                    {exp.techStack.map((tech, tIndex) => (
-                      <span key={tIndex} className="tech-badge">{tech}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer>
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-text">
-              <h3>Let's Build Something Great</h3>
-              <p style={{ color: 'var(--text-dim)', marginTop: '10px' }}>Open to exciting opportunities and collaborations</p>
+        {/* AI Systems */}
+        <section className="section" id="ai">
+          <div className="container">
+            <div className="section-header">
+              <div className="section-number">01 / AI ENGINEERING</div>
+              <h2>AI Systems</h2>
+              <p className="section-subtitle">
+                What I am building now. Each diagram follows one request from the moment it arrives to the moment it
+                is answered or deployed.
+              </p>
             </div>
-            <div className="footer-links">
-              <a href="mailto:Chandum9642@gmail.com" className="footer-link">Email</a>
-              <a href="https://www.linkedin.com/in/chandumarru964232/" target="_blank" rel="noopener noreferrer" className="footer-link">LinkedIn</a>
-              <a href="https://github.com/chandurao77" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
-              <a href="tel:609-701-1377" className="footer-link">Call</a>
-              <a href="https://docs.google.com/document/d/1cLF2Qxks5TQnYk-thQ2ps13JI6YBsiu1/edit?usp=sharing&ouid=115833640431706346767&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer" className="footer-link" style={{ color: 'var(--primary)' }}>
-                📥 Download Resume
-              </a>
+
+            <div className="systems">
+              {systems.map((system) => (
+                <article key={system.title} className="system">
+                  <div className="system-head">
+                    <h3>{system.title}</h3>
+                    <span className={system.statusAlt ? 'status alt' : 'status'}>{system.status}</span>
+                  </div>
+                  <p className="system-what">{system.description}</p>
+                  <Pipeline steps={system.pipeline} />
+                  {system.numbers && (
+                    <div className="nums">
+                      {system.numbers.map(([value, caption]) => (
+                        <div key={caption}>
+                          <b>{value}</b>
+                          <span>{caption}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {system.points && (
+                    <ul className="points">
+                      {system.points.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <TechStack items={system.techStack} />
+                </article>
+              ))}
             </div>
           </div>
-          <div className="copyright">
-            <p>&copy; 2026 Chandu Marru. Crafted with precision and passion.</p>
+        </section>
+
+        {/* Skills */}
+        <section className="section" id="skills">
+          <div className="container">
+            <div className="section-header">
+              <div className="section-number">02 / EXPERTISE</div>
+              <h2>Technical Arsenal</h2>
+              <p className="section-subtitle">
+                A toolkit spanning backend development, AI engineering, cloud architecture, frontend and DevOps.
+              </p>
+            </div>
+
+            <div className="skills-grid">
+              {skills.map((category) => (
+                <div key={category.title} className="skill-category">
+                  <h3>{category.title}</h3>
+                  <div className="skill-tags">
+                    {category.tags.map((tag) => (
+                      <span key={tag} className="skill-tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
+
+        {/* Experience */}
+        <section className="section" id="experience">
+          <div className="container">
+            <div className="section-header">
+              <div className="section-number">03 / CAREER JOURNEY</div>
+              <h2>Professional Experience</h2>
+              <p className="section-subtitle">
+                Enterprise systems across telecommunications, banking, distribution and insurance.
+              </p>
+            </div>
+
+            <div className="timeline">
+              {experiences.map((exp) => (
+                <div key={exp.company} className="timeline-item">
+                  <div className="timeline-header">
+                    <div className="timeline-title">
+                      <h3>{exp.title}</h3>
+                      <div className="company">{exp.company}</div>
+                      <div className="location">{exp.location}</div>
+                    </div>
+                    <div className="timeline-date">{exp.date}</div>
+                  </div>
+                  <div className="timeline-content">
+                    <ul>
+                      {exp.highlights.map((highlight) => (
+                        <li key={highlight}>{highlight}</li>
+                      ))}
+                    </ul>
+                    <TechStack items={exp.techStack} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Contact */}
+      <footer className="contact" id="contact">
+        <div className="container">
+          <h2>Let's Build <span className="gradient-text">Something Great</span></h2>
+          <p className="contact-sub">Open to exciting opportunities and collaborations.</p>
+          <ul className="reach">
+            <li>
+              <div>
+                <small>Email</small>
+                <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+              </div>
+              <CopyButton value={EMAIL} />
+            </li>
+            <li>
+              <div>
+                <small>Phone</small>
+                <a href={PHONE_HREF}>{PHONE}</a>
+              </div>
+              <CopyButton value={PHONE} />
+            </li>
+            <li>
+              <div>
+                <small>LinkedIn</small>
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">linkedin.com/in/chandumarru964232</a>
+              </div>
+            </li>
+            <li>
+              <div>
+                <small>GitHub</small>
+                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">github.com/chandurao77</a>
+              </div>
+            </li>
+          </ul>
+          <div className="copyright">&copy; {new Date().getFullYear()} Chandu Marru. Crafted with precision and passion.</div>
         </div>
       </footer>
-    </div>
+    </>
   );
 };
 
