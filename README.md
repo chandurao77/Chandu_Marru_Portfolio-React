@@ -1,6 +1,6 @@
 # Chandu Marru - Portfolio
 
-Professional portfolio website showcasing 8+ years of experience as a Senior Java Full Stack Developer.
+Professional portfolio website showcasing 9+ years of experience as a Senior Java Full Stack Developer and AI Engineer.
 
 ## 🚀 Quick Start
 
@@ -98,7 +98,8 @@ portfolio/
 ├── public/
 │   └── index.html
 ├── src/
-│   ├── Portfolio.jsx    # Main portfolio component
+│   ├── Portfolio.jsx    # Main portfolio component (content lives in the data at the top)
+│   ├── Portfolio.css    # Styles, including the light and dark themes
 │   └── index.js         # Entry point
 ├── package.json
 └── README.md
@@ -109,6 +110,7 @@ portfolio/
 - **Responsive Design** - Works on all devices
 - **Smooth Animations** - Engaging scroll animations
 - **Custom Cursor** - Interactive cursor effects
+- **Light and Dark Mode** - Toggle in the top bar; dark is the default and the choice is remembered
 - **Modern Stack** - React 18 with hooks
 - **SEO Optimized** - Proper meta tags and structure
 - **Fast Performance** - Optimized build process
@@ -117,7 +119,10 @@ portfolio/
 
 ### Update Personal Information
 
-Edit the following in `Portfolio.jsx`:
+Edit the constants and data arrays at the top of `Portfolio.jsx`:
+
+- Photo: put an image in `public/` (for example `public/profile.jpg`) and set `PHOTO_URL = '/profile.jpg'`. Until then the hero shows initials.
+- Resume: update `RESUME_URL`
 
 - Contact details (email, phone, LinkedIn)
 - GitHub profile link
@@ -128,16 +133,16 @@ Edit the following in `Portfolio.jsx`:
 
 ### Styling
 
-All styles are included in the component using CSS-in-JS. Modify the `<style>` tag within the component to customize colors, fonts, and layouts.
+All styles live in `src/Portfolio.css`.
 
 ### Color Scheme
 
-Current theme uses:
+Dark theme (default):
 - Primary: `#00ff88` (Neon Green)
-- Secondary: `#0066ff` (Blue)
+- Secondary: `#4d94ff` (Blue)
 - Background: `#0a0a0a` (Dark)
 
-Change these in the `:root` CSS variables.
+Change these in the `:root` CSS variables. The light theme values are in the `:root[data-theme="light"]` block.
 
 ## 🔗 Links
 
